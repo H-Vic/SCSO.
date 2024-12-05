@@ -1,0 +1,20 @@
+# Time : 
+# @Author : Cieber
+# @File : 
+# @desc:
+import numpy as np
+def initialization(SearchAgents_no, dim, ub, lb):
+    Boundary_no = np.size(ub)
+
+    # If the boundaries of all variables are equal (i.e., ub and lb are scalars)
+    if Boundary_no == 1:
+        Positions = np.random.rand(SearchAgents_no, dim) * (ub - lb) + lb
+    else:
+        # If each variable has different bounds
+        Positions = np.zeros((SearchAgents_no, dim))
+        for i in range(dim):
+            ub_i = ub[i]
+            lb_i = lb[i]
+            Positions[:, i] = np.random.rand(SearchAgents_no) * (ub_i - lb_i) + lb_i
+
+    return Positions
