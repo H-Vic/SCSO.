@@ -1,0 +1,51 @@
+# Time : 
+# @Author : Cieber
+# @File : 
+# @desc:
+import numpy as np
+import matplotlib.pyplot as plt
+
+
+from SCSO import SCSO
+#from QG_SCSO import QG_SCSO
+from Functions_details import Get_Functions_details  
+from scipy.special import gamma
+
+# Run parameters
+SearchAgents_no = 30
+Max_iteration = 500
+
+# Get detailed information about a function (lower bound, upper bound, dimension, and objective function)
+Function_name = 1
+lb, ub, dim, fobj = Get_Functions_details(Function_name)
+
+# 运行 SCSO 优化
+BsSCSO, BpSCSO, SCSO_cg_curve = SCSO(SearchAgents_no, Max_iteration, lb, ub, dim, fobj)
+
+#
+#BsSCSO1, BpSCSO1, QG_SCSO_cg_curve = QG_SCSO(SearchAgents_no, Max_iteration, lb, ub, dim, fobj)
+
+
+# Plot the convergence curve
+plt.semilogy(SCSO_cg_curve, color='black', linewidth=2.5, label='SCSO')
+#plt.semilogy(QG_SCSO_cg_curve, color='blue', linewidth=2.5, label='QG_SCSO')
+
+plt.title('Objective space', fontname='Times New Roman', fontsize=12)
+plt.xlabel('Iterations', fontname='Times New Roman', fontsize=12)
+plt.ylabel('Fitness value', fontname='Times New Roman', fontsize=12)
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+
+# Set the axis font
+plt.gca().set_facecolor('white')
+plt.gca().tick_params(axis='both', which='major', labelsize=12)
+
+plt.show()
+
+#output 
+print(f"The best solution obtained by SCSO is: {BpSCSO}")
+print(f"The best optimal value of the objective function found by SCSO is: {BsSCSO}")
+
+#print(f"The best solution obtained by QG_SCSO is: {BpSCSO1}")
+#print(f"The best optimal value of the objective function found by QG_SCSO is: {BsSCSO1}")
