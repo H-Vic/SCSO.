@@ -1,0 +1,71 @@
+# Time : 
+# @Author : Cieber
+# @File : 
+# @desc:
+import numpy as np
+import numpy as np
+def initialization(SearchAgents_no, dim, ub, lb):
+    Boundary_no = np.size(ub)
+
+    # If the boundaries of all variables are equal (i.e., ub and lb are scalars)
+    if Boundary_no == 1:
+        Positions = np.random.rand(SearchAgents_no, dim) * (ub - lb) + lb
+    else:
+        # If each variable has different bounds
+        Positions = np.zeros((SearchAgents_no, dim))
+        for i in range(dim):
+            ub_i = ub[i]
+            lb_i = lb[i]
+            Positions[:, i] = np.random.rand(SearchAgents_no) * (ub_i - lb_i) + lb_i
+
+    return Positions
+def SCSO(SearchAgents_no, Max_iter, lb, ub, dim, fobj):
+    BestFit = np.zeros(dim)
+    Best_Score = float('inf')
+
+    # Initialize positions
+    Positions = initialization(SearchAgents_no, dim, ub, lb)
+    QG_Convergence_curve = np.zeros(Max_iter)
+    t = 0
+    p = np.arange(1, 361)
+
+    while t < Max_iter:
+        for i in range(Positions.shape[0]):
+            # Boundaries check
+            Flag4ub = Positions[i, :] > ub
+            Flag4lb = Positions[i, :] < lb
+            Positions[i, :] = (Positions[i, :] * ~(Flag4ub + Flag4lb)) + ub * Flag4ub + lb * Flag4lb
+
+            # Evaluate fitness
+            fitness = fobj(Positions[i, :])
+            if fitness < Best_Score:
+                Best_Score = fitness
+                BestFit = Positions[i, :].copy()
+
+        S = 2  # Maximum Sensitivity range
+        rg = S - (S * t / Max_iter)  # Guides R
+
+        for i in range(Positions.shape[0]):
+            r = np.random.rand() * rg
+            R = ((2 * rg) * np.random.rand()) - rg  # Controls transition phases
+
+            for j in range(Positions.shape[1]):
+                teta = RouletteWheelSelection(p)
+                if -1 <= R <= 1:  # R value is between -1 and 1
+                    Rand_position = abs(np.random.rand() * BestFit[j] - Positions[i, j])
+                    Positions[i, j] = BestFit[j] - r * Rand_position * np.cos(np.deg2rad(teta))
+                else:
+                    cp = np.random.randint(SearchAgents_no)
+                    CandidatePosition = Positions[cp, :]
+                    Positions[i, j] = r * (CandidatePosition[j] - np.random.rand() * Positions[i, j])
+
+        t += 1
+        QG_Convergence_curve[t - 1] = Best_Score
+
+    return Best_Score, BestFit, QG_Convergence_curve
+
+
+def RouletteWheelSelection(p):
+    accumulation = np.cumsum(p)
+    r = np.random.rand() * accumulation[-1]
+    return np.searchsorted(accumulation, r)
